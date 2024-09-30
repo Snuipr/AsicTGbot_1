@@ -20,16 +20,12 @@ while True:
     current_hour = current_time.hour
     current_minute = current_time.minute
     response = requests.get(asic_link).text
-    soup = BeautifulSoup(response, 'lxml')
-    soup = soup.text.split(",")
-    soup = soup[2].split(":")
-    for i in soup[3:-1:1]:
-        asic_answer[i.split(':')[0][1:-1]] = i.split(':')[1][1:-1]
-    if float(asic_answer['hashrate_10min'][0:-1:1]) < 120:
+    asic_answer = BeautifulSoup(response, 'lxml').text
+    asic_answer = eval(asic_answer)
+    if float(asic_answer['data']['hashrate_10min'][0:-1]) < 120:
         asyncio.get_event_loop().run_until_complete(
-            asic_bot.send_message(-4511001816, text=f"Тревога! Маленький хэшрейт: {asic_answer['hashrate_10min']}"))
-        time.sleep(300)
+            asic_bot.send_message(-4511001816, text=f"Тревога! Маленький хэшрейт: {asic_answer['data']['hashrate_10min']}"))
     if current_hour == 12 and current_minute < 5:
         asyncio.get_event_loop().run_until_complete(
-               asic_bot.send_message(-4511001816, text=f"Прибыль за 24 часа: {float(asic_answer['profit_24hour'])//get_btc_course()} Rub"))
-        time.sleep(300)
+               asic_bot.send_message(-4511001816, text=f"Прибыль за 24 часа: {float(asic_answer['data']['profit_24hour'])//get_btc_course()} Rub"))
+    time.sleep(300)
