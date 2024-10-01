@@ -19,9 +19,7 @@ while True:
     current_time = datetime.datetime.now().time()
     current_hour = current_time.hour
     current_minute = current_time.minute
-    response = requests.get(asic_link).text
-    asic_answer = BeautifulSoup(response, 'lxml').text
-    asic_answer = eval(asic_answer)
+    asic_answer = requests.get(asic_link).json()
     if float(asic_answer['data']['hashrate_10min'][0:-1]) < 120:
         asyncio.get_event_loop().run_until_complete(
             asic_bot.send_message(-4511001816, text=f"Тревога! Маленький хэшрейт: {asic_answer['data']['hashrate_10min']}"))
