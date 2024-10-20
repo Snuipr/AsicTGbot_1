@@ -26,4 +26,4 @@ while True:
     if current_hour == 12 and current_minute < 5:
         asyncio.get_event_loop().run_until_complete(
                asic_bot.send_message(-4511001816, text=f"Прибыль за 24 часа: {float(asic_answer['data']['profit_24hour'])//get_btc_course()} Rub"))
-    time.sleep(300)
+    time.sleep(1200)
