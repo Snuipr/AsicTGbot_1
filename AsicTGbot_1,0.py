@@ -64,7 +64,6 @@ def get_btc_course(btc_link = 'https://www.bybit.com/ru-RU/convert/rub-to-btc/')
 asic_link = 'https://trustpool.ru/res/saas/observer/home?access_key=25e2c98bebdc10ec04d4fa8d6a8b1ad5&user_id=555914&coin=BTC'
 asic_bot = Bot(token='7442779646:AAG0LyU_t4hrOTmVBxonsDtx_U-fYhXOYUg')
 while True:
-    asic_answer = {}
     current_time = datetime.datetime.now().time()
     current_hour = current_time.hour
     current_minute = current_time.minute
