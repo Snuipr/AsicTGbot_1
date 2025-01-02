@@ -51,27 +51,37 @@ headers = {
 }
 def get_btc_course(btc_link = 'https://www.bybit.com/ru-RU/convert/rub-to-btc/'):
     answer = ''
-    response = requests.get(btc_link, cookies=cookies, headers=headers).text
-    soup = BeautifulSoup(response, 'lxml')
-    soup1 = soup.find('h2', class_='card-info-price-box')
-    for i in soup1.text:
-        if i in ['-', '+']:
-            break
-        elif i.isdigit() or i == '.':
-            answer += i
-    return float(answer)
-
+    try:
+        response = requests.get(btc_link, cookies=cookies, headers=headers).text
+        soup = BeautifulSoup(response, 'lxml')
+        soup1 = soup.find('h2', class_='card-info-price-box')
+        for i in soup1.text:
+            if i in ['-', '+']:
+                break
+            elif i.isdigit() or i == '.':
+                answer += i
+        return float(answer)
+    except:
+        print("ОШИБКА ПОЛУЧЕНИЯ КУРСА")
+        asyncio.get_event_loop().run_until_complete(
+            asic_bot.send_message(-4511001816, text="ОШИБКА ПОЛУЧЕНИЯ КУРСА"))
+        exit()
 asic_link = 'https://trustpool.ru/res/saas/observer/home?access_key=25e2c98bebdc10ec04d4fa8d6a8b1ad5&user_id=555914&coin=BTC'
-asic_bot = Bot(token='7442779646:AAG0LyU_t4hrOTmVBxonsDtx_U-fYhXOYUg')
+asic_bot = Bot(token='7442779646:AAG0LyU_t4hrOTmVBxonsDtx_U-fYhXOYUg')   
 while True:
-    current_time = datetime.datetime.now().time()
-    current_hour = current_time.hour
-    current_minute = current_time.minute
-    asic_answer = requests.get(asic_link).json()
-    if float(asic_answer['data']['hashrate_10min'][0:-1]) < 120:
+    try:
+        current_time = datetime.datetime.now().time()
+        current_hour = current_time.hour
+        current_minute = current_time.minute
+        asic_answer = requests.get(asic_link).json()
+        if float(asic_answer['data']['hashrate_10min'][0:-1]) < 120:
+            asyncio.get_event_loop().run_until_complete(
+                asic_bot.send_message(-4511001816, text=f"Тревога! Маленький хэшрейт: {asic_answer['data']['hashrate_10min']}"))
+        if current_hour == 12 and current_minute < 21:
+            asyncio.get_event_loop().run_until_complete(
+                   asic_bot.send_message(-4511001816, text=f"Прибыль за 24 часа: {float(asic_answer['data']['profit_24hour']) // get_btc_course()} Rub"))
+        time.sleep(1200)
+    except:
+        print("ОШИБКА ОТПРАВКИ СООБЩЕНИЯ")
         asyncio.get_event_loop().run_until_complete(
-            asic_bot.send_message(-4511001816, text=f"Тревога! Маленький хэшрейт: {asic_answer['data']['hashrate_10min']}"))
-    if current_hour == 12 and current_minute < 21:
-        asyncio.get_event_loop().run_until_complete(
-               asic_bot.send_message(-4511001816, text=f"Прибыль за 24 часа: {float(asic_answer['data']['profit_24hour'])//get_btc_course()} Rub"))
-    time.sleep(1200)
+            asic_bot.send_message(-4511001816, text="ОШИБКА ОТПРАВКИ"))
