@@ -1,0 +1,39 @@
+import asyncio
+import psycopg2
+from aiogram import Bot, Dispatcher
+from aiogram.types import Message
+from aiogram.filters.command import Command
+
+def create_status(id, status):
+    conn = psycopg2.connect(dbname="Asic", user="postgres", password="1", host="localhost", port="5432")
+    conn.autocommit = True
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM bot_status WHERE id = %s", (id,))
+    res = cursor.fetchall()
+    if len(res) > 0:
+        cursor.execute("UPDATE bot_status SET status = %s WHERE id = %s", (status, id))
+        conn.commit()
+    else:
+        cursor.execute("INSERT INTO bot_status(id, status) VALUES (%s, %s)", (id, status))
+        conn.commit()
+    cursor.close()
+    conn.close()
+
+
+asic_bot = Bot(token='7442779646:AAG0LyU_t4hrOTmVBxonsDtx_U-fYhXOYUg')
+ds = Dispatcher()
+
+@ds.message(Command("start"))
+async def start(message: Message):
+    create_status(1, 1)
+    await message.answer("Бот включен")
+
+@ds.message(Command("stop"))
+async def stop(message: Message):
+    create_status(1, 0)
+    await message.answer("Бот остановлен")
+
+async def main():
+    await ds.start_polling(asic_bot)
+
+asyncio.run(main())
