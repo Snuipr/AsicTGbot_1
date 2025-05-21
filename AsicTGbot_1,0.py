@@ -1,5 +1,6 @@
 import asyncio
 import time
+import psycopg2
 import requests
 import datetime
 from aiogram import Bot
@@ -66,13 +67,28 @@ def get_btc_course(btc_link = 'https://www.bybit.com/ru-RU/convert/rub-to-btc/')
         asyncio.get_event_loop().run_until_complete(
             asic_bot.send_message(-4511001816, text="ОШИБКА ПОЛУЧЕНИЯ КУРСА"))
         exit()
+
+def get_bot_status():
+    conn = psycopg2.connect(dbname="Asic", user="postgres", password="1", host="localhost", port="5432")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM bot_status")
+    result = cursor.fetchall()
+    status = result[0]
+    return status[1]
+
+
+
 asic_link = 'https://trustpool.ru/res/saas/observer/home?access_key=25e2c98bebdc10ec04d4fa8d6a8b1ad5&user_id=555914&coin=BTC'
-asic_bot = Bot(token='7442779646:AAG0LyU_t4hrOTmVBxonsDtx_U-fYhXOYUg')   
+asic_bot = Bot(token='7442779646:AAG0LyU_t4hrOTmVBxonsDtx_U-fYhXOYUg')
+asyncio.get_event_loop().run_until_complete(
+                asic_bot.send_message(-4511001816, text="Бот работает"))
 while True:
-    try:
+    status = get_bot_status()
+    if status == 1:
         current_time = datetime.datetime.now().time()
         current_hour = current_time.hour
         current_minute = current_time.minute
+        current_second = current_time.second
         asic_answer = requests.get(asic_link).json()
         if float(asic_answer['data']['hashrate_10min'][0:-1]) < 120:
             asyncio.get_event_loop().run_until_complete(
@@ -81,7 +97,6 @@ while True:
             asyncio.get_event_loop().run_until_complete(
                    asic_bot.send_message(-4511001816, text=f"Прибыль за 24 часа: {float(asic_answer['data']['profit_24hour']) // get_btc_course()} Rub"))
         time.sleep(1200)
-    except:
-        print("ОШИБКА ОТПРАВКИ СООБЩЕНИЯ")
-        asyncio.get_event_loop().run_until_complete(
-            asic_bot.send_message(-4511001816, text="ОШИБКА ОТПРАВКИ"))
+    else:
+        time.sleep(5)
+
